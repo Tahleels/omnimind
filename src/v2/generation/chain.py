@@ -51,9 +51,13 @@ def _make_llm(provider: str, model: str, role: str):
     """Initialise an LLM based on provider string."""
     if provider == "openrouter":
         logger.info(f"Initialising OpenRouter {role} LLM: {model}")
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            logger.warning(f"⚠ OPENROUTER_API_KEY not found for {role} LLM. Using dummy key.")
+            api_key = "dummy-key-for-init"
         return ChatOpenAI(
             model=model,
-            openai_api_key=os.getenv("OPENROUTER_API_KEY"),
+            openai_api_key=api_key,
             openai_api_base="https://openrouter.ai/api/v1",
             temperature=0.1,
             max_tokens=2048,
@@ -64,9 +68,13 @@ def _make_llm(provider: str, model: str, role: str):
         )
     else:
         logger.info(f"Initialising Gemini {role} LLM: {model}")
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            logger.warning(f"⚠ GOOGLE_API_KEY not found for {role} LLM. Using dummy key.")
+            api_key = "dummy-key-for-init"
         return ChatGoogleGenerativeAI(
             model=model,
-            google_api_key=os.getenv("GOOGLE_API_KEY"),
+            google_api_key=api_key,
             temperature=0.1,
             max_output_tokens=2048,
         )
