@@ -34,4 +34,4 @@ ENV PYTHONUNBUFFERED=1 \
     COLLECTION_NAME=langchain_docs
 
 # Run the server
-CMD ["uvicorn", "src.v2.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn src.v2.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
