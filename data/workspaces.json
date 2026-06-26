@@ -1,0 +1,34 @@
+{
+  "version": "1",
+  "workspaces": {
+    "default": {
+      "workspace_id": "default",
+      "name": "LangChain Docs",
+      "description": "Pre-indexed LangChain documentation (read-only).",
+      "sources": [],
+      "created_at": "2026-06-26T15:00:22.304659Z",
+      "last_modified": "2026-06-26T15:00:22.304659Z",
+      "is_default": true
+    },
+    "595e626a-6003-4257-9f97-4a857daf02da": {
+      "workspace_id": "595e626a-6003-4257-9f97-4a857daf02da",
+      "name": "Tahleel's Space",
+      "description": "Personal docs",
+      "sources": [
+        {
+          "source_id": "3cef3025-6602-4ffd-baf4-33b1d71d29db",
+          "source_type": "pdf",
+          "name": "TahleelShaikhResume.pdf",
+          "origin": "TahleelShaikhResume.pdf",
+          "chunk_count": 1,
+          "ingested_at": "2026-06-26T15:41:29.328322Z",
+          "page_count": 1,
+          "word_count": 324
+        }
+      ],
+      "created_at": "2026-06-26T15:41:12.623362Z",
+      "last_modified": "2026-06-26T15:41:29.328322Z",
+      "is_default": false
+    }
+  }
+}

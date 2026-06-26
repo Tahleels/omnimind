@@ -1,0 +1,15 @@
+# .gitignore
+.env
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+data/qdrant_storage/
+data/bm25_index.pkl
+data/raw/
+*.log
+.DS_Store

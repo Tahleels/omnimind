@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OmniMind — Agentic RAG v2</title>
+<meta name="description" content="Agentic RAG with workspace isolation, conversation memory, hybrid retrieval, and dynamic document ingestion." />
+<link rel="stylesheet" href="/static/css/main.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-text"><span>OmniMind</span> — RAG v2</div>
+  </div>
+  <div class="header-badges">
+    <div class="badge">Hybrid Retrieval</div>
+    <div class="badge">Cross-Encoder</div>
+    <div class="badge" id="status-badge">
+      <span class="badge-dot"></span>
+      <span id="status-text">Checking…</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════ APP BODY ═══════════════════════════════ -->
+<div class="app-body">
+
+  <!-- ─── Sidebar ─── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Workspaces</span>
+      <button class="btn-new-ws" id="btn-new-ws" title="New Workspace">+</button>
+    </div>
+    <div class="workspace-list" id="workspace-list"><!-- rendered by workspace.js --></div>
+    <div class="sidebar-footer">
+      <span class="search-mode-label">Search mode</span>
+      <div class="mode-toggle" id="mode-toggle">
+        <button class="mode-btn" data-mode="docs"      title="Search LangChain Docs only">📚 Docs</button>
+        <button class="mode-btn active" data-mode="combined" title="Search all sources">🌀 Combined</button>
+        <button class="mode-btn" data-mode="workspace" title="Search your workspace only">📂 Mine</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── Main area ─── -->
+  <div class="main-area">
+
+    <!-- Chat panel -->
+    <div class="chat-panel">
+      <div class="messages" id="messages">
+        <div class="welcome" id="welcome">
+          <h2>Ask <span>Your Documents</span></h2>
+          <p>Upload PDFs, Word docs, paste URLs or YouTube links into a workspace — then ask anything. Every answer is cited and grounded.</p>
+          <div class="pipeline-tags">
+            <span class="tag">BM25 + Vector Hybrid</span>
+            <span class="tag">RRF Fusion</span>
+            <span class="tag">Cross-Encoder Reranking</span>
+            <span class="tag">Gemini 2.5 Flash</span>
+            <span class="tag">Citation Enforcement</span>
+            <span class="tag">10-Turn Memory</span>
+          </div>
+          <div class="example-qs">
+            <button class="example-q" id="eq1">What is LCEL and how do you chain runnables?</button>
+            <button class="example-q" id="eq2">How does RecursiveCharacterTextSplitter work?</button>
+            <button class="example-q" id="eq3">What is the difference between an LLM and a ChatModel?</button>
+            <button class="example-q" id="eq4">How do I add memory to a LangChain chain?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-toolbar">
+          <button class="toolbar-btn" id="btn-clear-session" title="Clear conversation">🗑 Clear chat</button>
+          <button class="toolbar-btn" id="btn-ingest-url" title="Ingest a URL or YouTube link">🌐 Add URL</button>
+        </div>
+        <div class="input-wrapper">
+          <textarea
+            id="question-input"
+            placeholder="Ask anything about your documents…"
+            rows="1"
+          ></textarea>
+          <div class="input-actions">
+            <button id="attach-btn" title="Upload PDF / DOCX / TXT">📎</button>
+            <button id="send-btn" title="Send (Enter)">➤</button>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="file-input" accept=".pdf,.docx,.txt,.md" />
+    </div>
+
+    <!-- Sources panel -->
+    <div class="sources-panel">
+      <div class="sources-header">
+        📎 Cited Sources
+        <span id="sources-count" style="margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;"></span>
+      </div>
+      <div class="sources-content" id="sources-content">
+        <div class="sources-empty">Sources appear here after you ask a question.</div>
+      </div>
+      <div class="pipeline-stats" id="pipeline-stats" style="display:none;">
+        <div class="pipeline-stats-title">Pipeline Stats</div>
+        <div class="stats-grid" id="stats-grid"></div>
+      </div>
+    </div>
+
+  </div><!-- /.main-area -->
+</div><!-- /.app-body -->
+
+<!-- ═══════════════════════════════ OVERLAYS ═══════════════════════════════ -->
+
+<!-- Upload progress overlay -->
+<div class="upload-overlay" id="upload-overlay">
+  <div class="upload-card">
+    <h3>⚡ Processing Source</h3>
+    <p id="upload-filename" style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;word-break:break-all;"></p>
+    <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+    <div class="upload-steps">
+      <div class="upload-step" id="step-0">🔍 Parsing document…</div>
+      <div class="upload-step" id="step-1">🧠 Generating embeddings…</div>
+      <div class="upload-step" id="step-2">📦 Indexing into workspace…</div>
+    </div>
+  </div>
+</div>
+
+<!-- New workspace modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3>Create Workspace</h3>
+    <div class="form-group">
+      <label for="ws-name-input">Workspace name *</label>
+      <input type="text" id="ws-name-input" placeholder="e.g. Q3 Research, Physics Notes…" maxlength="80" />
+    </div>
+    <div class="form-group">
+      <label for="ws-desc-input">Description (optional)</label>
+      <input type="text" id="ws-desc-input" placeholder="Short description…" maxlength="200" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="btn-modal-cancel">Cancel</button>
+      <button class="btn primary" id="btn-modal-create">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- URL ingest modal -->
+<div class="modal-overlay" id="url-modal-overlay">
+  <div class="modal">
+    <h3>Add URL / YouTube Link</h3>
+    <div class="form-group">
+      <label for="url-input">URL *</label>
+      <input type="url" id="url-input" placeholder="https://… or https://youtu.be/…" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="btn-url-cancel">Cancel</button>
+      <button class="btn primary" id="btn-url-ingest">Ingest</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ═══════════════════════════════ SCRIPTS ═══════════════════════════════ -->
+<script type="module">
+import { checkHealth, askQuestion } from '/static/js/api.js';
+import { addMessage, addTyping, removeTyping, renderSources, showToast, autoResize } from '/static/js/chat.js';
+import { loadSessionId, saveSessionId, loadWorkspaceId, saveWorkspaceId, restoreHistory, clearSessionId } from '/static/js/memory.js';
+import {
+  loadWorkspaces, onWorkspaceChange, getActiveWorkspaceId,
+  openNewWorkspaceModal, closeModal, submitNewWorkspace,
+  handleFileUpload, handleUrlIngest,
+} from '/static/js/workspace.js';
+
+// ── State ──
+let sessionId = loadSessionId();
+let isLoading = false;
+let searchMode = 'combined';
+
+// ── Health check ──
+async function checkStatus() {
+  try {
+    const data = await checkHealth();
+    const badge = document.getElementById('status-badge');
+    const text = document.getElementById('status-text');
+    if (data.indexes_loaded) {
+      badge.classList.add('green');
+      text.textContent = 'Ready';
+    } else {
+      text.textContent = 'Not Indexed';
+    }
+  } catch {
+    document.getElementById('status-text').textContent = 'Offline';
+  }
+}
+
+// ── Workspace init ──
+onWorkspaceChange(wsId => {
+  saveWorkspaceId(wsId);
+});
+
+const savedWorkspace = loadWorkspaceId();
+await loadWorkspaces(savedWorkspace);
+
+// ── Restore history ──
+if (sessionId) {
+  const restored = await restoreHistory(sessionId, (role, content) => {
+    addMessage(role === 'user' ? 'user' : 'ai', content);
+  });
+  if (restored) showToast('Conversation history restored.', 'info', 2500);
+}
+
+// ── Search mode toggle ──
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    searchMode = btn.dataset.mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// ── Send question ──
+async function sendQuestion(q = null) {
+  const input = document.getElementById('question-input');
+  const btn = document.getElementById('send-btn');
+  const question = (q || input.value).trim();
+  if (!question || isLoading) return;
+
+  isLoading = true;
+  input.value = '';
+  input.style.height = 'auto';
+  btn.disabled = true;
+
+  addMessage('user', question);
+  addTyping();
+
+  try {
+    const data = await askQuestion(
+      question, sessionId,
+      getActiveWorkspaceId(),
+      searchMode,
+    );
+    removeTyping();
+
+    // Persist returned session_id
+    sessionId = data.session_id;
+    saveSessionId(sessionId);
+
+    addMessage('ai', data.answer, data.retrieval_stats, data.route);
+    renderSources(data.sources, data.retrieval_stats);
+  } catch (e) {
+    removeTyping();
+    addMessage('ai', `❌ ${e.message}`);
+    showToast(e.message, 'error');
+  } finally {
+    isLoading = false;
+    btn.disabled = false;
+    input.focus();
+  }
+}
+
+// ── Input bindings ──
+const qi = document.getElementById('question-input');
+qi.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendQuestion(); }
+});
+qi.addEventListener('input', () => autoResize(qi));
+document.getElementById('send-btn').addEventListener('click', () => sendQuestion());
+
+// ── Example questions ──
+['eq1','eq2','eq3','eq4'].forEach(id => {
+  const btn = document.getElementById(id);
+  if (btn) btn.addEventListener('click', () => sendQuestion(btn.textContent));
+});
+
+// ── Clear session ──
+document.getElementById('btn-clear-session').addEventListener('click', async () => {
+  if (sessionId) {
+    try {
+      const { clearSession } = await import('/static/js/api.js');
+      await clearSession(sessionId);
+    } catch {}
+  }
+  clearSessionId();
+  sessionId = null;
+  document.getElementById('messages').innerHTML = '';
+  renderSources([], null);
+  showToast('Chat cleared.', 'info', 2000);
+});
+
+// ── File upload ──
+document.getElementById('attach-btn').addEventListener('click', () => {
+  document.getElementById('file-input').click();
+});
+document.getElementById('file-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (file) await handleFileUpload(file);
+  e.target.value = '';
+});
+
+// ── URL ingest ──
+document.getElementById('btn-ingest-url').addEventListener('click', () => {
+  document.getElementById('url-modal-overlay').classList.add('show');
+  document.getElementById('url-input').value = '';
+  document.getElementById('url-input').focus();
+});
+document.getElementById('btn-url-cancel').addEventListener('click', () => {
+  document.getElementById('url-modal-overlay').classList.remove('show');
+});
+document.getElementById('btn-url-ingest').addEventListener('click', async () => {
+  const url = document.getElementById('url-input').value.trim();
+  document.getElementById('url-modal-overlay').classList.remove('show');
+  if (url) await handleUrlIngest(url);
+});
+
+// ── New workspace modal ──
+document.getElementById('btn-new-ws').addEventListener('click', openNewWorkspaceModal);
+document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
+document.getElementById('btn-modal-create').addEventListener('click', submitNewWorkspace);
+document.getElementById('ws-name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') submitNewWorkspace();
+});
+
+checkStatus();
+</script>
+</body>
+</html>

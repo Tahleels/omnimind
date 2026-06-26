@@ -1,0 +1,52 @@
+# =============================================================
+# Production RAG Application — Dependencies
+# Tested on Python 3.12
+# =============================================================
+
+# --- Dependency pinning for compatibility ---
+huggingface-hub>=0.23.0,<1.0.0   # Must satisfy both transformers & datasets
+
+# --- Orchestration ---
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-google-genai>=2.0.0
+langchain-openai>=0.2.0
+langgraph>=0.2.0
+
+# --- Local Embeddings & Reranking (CPU, no API key needed) ---
+sentence-transformers>=3.0.0
+torch>=2.2.0
+
+# --- Vector DB (local file mode, no Docker needed) ---
+qdrant-client>=1.9.0
+
+# --- Sparse Retrieval ---
+rank-bm25>=0.2.2
+
+# --- Dynamic Document Parsers (v2) ---
+pypdf>=4.0.0           # PDF text extraction
+python-docx>=1.1.0     # Word document extraction
+youtube-transcript-api>=0.6.0  # YouTube transcript fetching
+
+# --- Web Search (v2, optional) ---
+tavily-python>=0.3.0   # Tavily search API (free tier available)
+
+# --- Web Scraping (for doc ingestion) ---
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+lxml>=5.0.0
+
+# --- API Server ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9  # Required for file upload endpoints
+
+# --- Evaluation ---
+ragas>=0.2.0
+datasets>=2.20.0
+
+# --- Utilities ---
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+tqdm>=4.66.0
+numpy>=1.26.0
