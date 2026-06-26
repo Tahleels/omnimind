@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from dotenv import load_dotenv
 load_dotenv()
 
-from src.evaluation.run_eval import run_evaluation, print_report
+from scripts.evaluate_v2 import run_evaluation, print_report
 
 # Thresholds from .env (or defaults)
 MIN_FAITHFULNESS = float(os.getenv("MIN_FAITHFULNESS", "0.75"))

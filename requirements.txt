@@ -44,6 +44,8 @@ python-multipart>=0.0.9  # Required for file upload endpoints
 # --- Evaluation ---
 ragas>=0.2.0
 datasets>=2.20.0
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
 
 # --- Utilities ---
 python-dotenv>=1.0.0
