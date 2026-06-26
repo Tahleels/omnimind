@@ -1,4 +1,4 @@
-# AskMyDocs — Agentic RAG v2
+# OmniMind — Agentic RAG v2
 
 A production-grade **Universal Document Intelligence Hub** — upload PDFs, Word docs, web URLs, or YouTube videos into isolated workspaces, then chat with your data using hybrid retrieval, cross-encoder reranking, and conversation memory.
 
@@ -41,7 +41,7 @@ User Query
     │                     │
     ▼                     ▼
 Memory Store          Workspace Manager
-(10 turns/session)    (JSON + Qdrant filter)
+    (10 turns/session)    (JSON + Qdrant filter)
 ```
 
 ---
@@ -232,7 +232,7 @@ The router will automatically detect queries like *"latest langchain release"* o
 
 ```bash
 # Run LLM-as-a-judge evaluation on 10 samples
-python scripts/evaluate.py --samples 10
+python scripts/evaluate_v2.py --samples 10
 
 # CI quality gate (fails if faithfulness < 0.75 or relevance < 0.70)
 pytest tests/ -v
@@ -253,4 +253,5 @@ pytest tests/ -v
 **Primary → backup LLM failover** — If the primary model (e.g. free OpenRouter tier) hits rate limits, the backup (Gemini) is tried transparently.
 
 **v1 baseline preserved in `src/v1/`** — The original linear pipeline is frozen as a reference. Switch the server back to `src.v1.api.main:app` to A/B compare.
+
 
