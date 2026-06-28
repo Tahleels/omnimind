@@ -20,26 +20,14 @@ logger = logging.getLogger(__name__)
 # Curated list of LangChain documentation URLs to index
 # ---------------------------------------------------------------------------
 LANGCHAIN_DOC_URLS = [
-    "https://python.langchain.com/docs/introduction/",
-    "https://python.langchain.com/docs/concepts/",
-    "https://python.langchain.com/docs/concepts/lcel/",
-    "https://python.langchain.com/docs/concepts/chat_models/",
-    "https://python.langchain.com/docs/concepts/messages/",
-    "https://python.langchain.com/docs/concepts/prompt_templates/",
-    "https://python.langchain.com/docs/concepts/output_parsers/",
-    "https://python.langchain.com/docs/concepts/retrieval/",
-    "https://python.langchain.com/docs/concepts/vectorstores/",
-    "https://python.langchain.com/docs/concepts/embedding_models/",
-    "https://python.langchain.com/docs/concepts/text_splitters/",
-    "https://python.langchain.com/docs/concepts/document_loaders/",
-    "https://python.langchain.com/docs/concepts/agents/",
-    "https://python.langchain.com/docs/concepts/tools/",
-    "https://python.langchain.com/docs/concepts/memory/",
-    "https://python.langchain.com/docs/tutorials/rag/",
-    "https://python.langchain.com/docs/tutorials/chatbot/",
-    "https://python.langchain.com/docs/tutorials/llm_chain/",
-    "https://python.langchain.com/docs/how_to/recursive_text_splitter/",
-    "https://python.langchain.com/docs/how_to/embed_text/",
+    "https://docs.langchain.com/oss/python/langchain/overview",
+    "https://docs.langchain.com/oss/python/langchain/agents",
+    "https://docs.langchain.com/oss/python/langchain/models",
+    "https://docs.langchain.com/oss/python/langchain/messages",
+    "https://docs.langchain.com/oss/python/langchain/tools",
+    "https://docs.langchain.com/oss/python/langchain/streaming",
+    "https://docs.langchain.com/oss/python/langchain/structured-output",
+    "https://docs.langchain.com/oss/python/langchain/short-term-memory",
 ]
 
 
@@ -110,9 +98,7 @@ def load_url(url: str, timeout: int = 15, retries: int = 2) -> Optional[Document
         A Document object, or None if the page could not be fetched.
     """
     headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (compatible; RAGBot/1.0; +https://github.com)"
-        )
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
     for attempt in range(retries + 1):
