@@ -40,11 +40,13 @@ jobs:
       - name: Run ingestion (rebuild indexes)
         env:
           GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: python scripts/ingest.py --recreate
 
       - name: Run evaluation gate
         env:
           GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           MIN_FAITHFULNESS: "0.75"
           MIN_ANSWER_RELEVANCE: "0.70"
           EVAL_SAMPLES: "5"
