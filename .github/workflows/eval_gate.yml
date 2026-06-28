@@ -11,7 +11,7 @@ jobs:
     name: Evaluate RAG Pipeline Quality
     runs-on: ubuntu-latest
     env:
-      HF_ENDPOINT: https://hf-mirror.com
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
 
     steps:
       - name: Checkout code

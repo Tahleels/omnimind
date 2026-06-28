@@ -44,10 +44,19 @@ EMBEDDING_DIM = 384  # Dimension for all-MiniLM-L6-v2
 
 def _get_embedding_model(model_name: str) -> SentenceTransformer:
     """Load (and cache) the SentenceTransformer embedding model."""
+    import time
     logger.info(f"Loading embedding model: {model_name}")
-    model = SentenceTransformer(model_name)
-    logger.info("✓ Embedding model loaded")
-    return model
+    
+    for attempt in range(5):
+        try:
+            model = SentenceTransformer(model_name)
+            logger.info("✓ Embedding model loaded")
+            return model
+        except Exception as e:
+            logger.warning(f"Attempt {attempt + 1} to load model failed: {e}")
+            if attempt == 4:
+                raise
+            time.sleep(10 * (attempt + 1))
 
 
 def _embed_chunks(
