@@ -17,18 +17,62 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Curated list of LangChain documentation URLs to index
+# Dynamically discover core LangChain documentation URLs
 # ---------------------------------------------------------------------------
-LANGCHAIN_DOC_URLS = [
-    "https://docs.langchain.com/oss/python/langchain/overview",
-    "https://docs.langchain.com/oss/python/langchain/agents",
-    "https://docs.langchain.com/oss/python/langchain/models",
-    "https://docs.langchain.com/oss/python/langchain/messages",
-    "https://docs.langchain.com/oss/python/langchain/tools",
-    "https://docs.langchain.com/oss/python/langchain/streaming",
-    "https://docs.langchain.com/oss/python/langchain/structured-output",
-    "https://docs.langchain.com/oss/python/langchain/short-term-memory",
-]
+def discover_langchain_urls() -> list[str]:
+    """
+    Fetch the LangChain overview page and dynamically parse core documentation URLs.
+    """
+    overview_url = "https://docs.langchain.com/oss/python/langchain/overview"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    
+    fallback_urls = [
+        "https://docs.langchain.com/oss/python/langchain/overview",
+        "https://docs.langchain.com/oss/python/langchain/agents",
+        "https://docs.langchain.com/oss/python/langchain/models",
+        "https://docs.langchain.com/oss/python/langchain/messages",
+        "https://docs.langchain.com/oss/python/langchain/tools",
+        "https://docs.langchain.com/oss/python/langchain/streaming",
+        "https://docs.langchain.com/oss/python/langchain/structured-output",
+        "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+    ]
+    
+    try:
+        logger.info(f"Dynamically discovering doc URLs from: {overview_url}")
+        response = requests.get(overview_url, headers=headers, timeout=15)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, "lxml")
+        discovered = set()
+        
+        # Find all links on the overview page
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            # Convert relative path to absolute
+            if href.startswith("/"):
+                href = f"https://docs.langchain.com{href}"
+            
+            # Match only core components (e.g. /oss/python/langchain/agents)
+            # Exclude nested sections like /middleware/... or /frontend/...
+            # and ignore anchors/queries
+            match = re.match(r"^https://docs\.langchain\.com/oss/python/langchain/([^/#?]+)$", href)
+            if match:
+                discovered.add(href)
+                
+        if discovered:
+            discovered.add(overview_url)
+            sorted_urls = sorted(list(discovered))
+            logger.info(f"✓ Dynamically discovered {len(sorted_urls)} documentation URLs.")
+            return sorted_urls
+            
+    except Exception as e:
+        logger.warning(f"Failed to dynamically discover URLs: {e}. Using fallback default list.")
+        
+    return fallback_urls
+
+LANGCHAIN_DOC_URLS = discover_langchain_urls()
 
 
 @dataclass

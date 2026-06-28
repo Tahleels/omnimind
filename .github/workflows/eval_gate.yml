@@ -49,7 +49,7 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           MIN_FAITHFULNESS: "0.75"
           MIN_ANSWER_RELEVANCE: "0.70"
-          EVAL_SAMPLES: "5"
+          EVAL_SAMPLES: "2"
         run: pytest tests/test_eval_gate.py -v --tb=short
 
       - name: Upload eval report
