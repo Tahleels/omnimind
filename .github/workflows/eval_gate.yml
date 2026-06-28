@@ -10,6 +10,8 @@ jobs:
   eval-gate:
     name: Evaluate RAG Pipeline Quality
     runs-on: ubuntu-latest
+    env:
+      HF_ENDPOINT: https://hf-mirror.com
 
     steps:
       - name: Checkout code
